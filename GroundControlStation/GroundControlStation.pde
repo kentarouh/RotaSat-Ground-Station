@@ -5,8 +5,8 @@ import controlP5.*; // http://www.sojamo.de/libraries/controlP5/
 import processing.serial.*;
 
 // Colors
-color bgColor = color(10, 10, 10);
-color bgColor2 = color(27, 27, 28);
+color bgColor = color(14, 19, 31);
+color bgColor2 = color(23, 35, 54);
 color fgColor = color(230, 230, 230);
 
 color xColor = color(235, 75, 75);
@@ -21,10 +21,11 @@ ControlP5 cp5;
 PImage logo;
 
 Graph oriGraph = new Graph(1900 - 275, 130 + 30, 260, 140, fgColor);
-Graph accelGraph = new Graph(1900 - 275, 350 + 30, 260, 140, fgColor);;
-Graph gyroGraph = new Graph(1900 - 275, 570 + 30, 260, 140, fgColor);;
-Graph altitudeGraph = new Graph(1900 - 275, 790 + 30, 260, 140, fgColor);;
-Graph velocityGraph = new Graph(60, 165 + (3*230 + 15), 260, 90, fgColor);;
+Graph accelGraph = new Graph(1900 - 275, 350 + 30, 260, 140, fgColor);
+Graph gyroGraph = new Graph(1900 - 275, 570 + 30, 260, 140, fgColor);
+Graph altitudeGraph = new Graph(1900 - 275, 790 + 30, 260, 140, fgColor);
+Graph pressureGraph = new Graph(60, 165 + (3*230 + 60), 260, 90, fgColor);
+Graph temperatureGraph = new Graph(60, 171 + (3*193), 260, 90, fgColor);
 
 // Datas
 int dataSeconds = 5;
@@ -47,9 +48,13 @@ float[] altitudeValues = new float[dataSamples.length];
 float altitudeMax = 0;
 float altitudelMin = 0;
 
-float[] velocityValues = new float[dataSamples.length];
-float velocityMax = 0;
-float velocityMin = 0;
+float[] pressureValues = new float[dataSamples.length];
+float pressureMax = 0;
+float pressureMin = 0;
+
+float[] temperatureValues = new float[dataSamples.length];
+float temperatureMax = 0;
+float temperatureMin = 0;
 
 // Current data
 float oriX = 0;
@@ -62,25 +67,23 @@ float gyroX = 0;
 float gyroY = 0;
 float gyroZ = 0;
 float altitude = 0;
-float tvcY = 0;
-float tvcZ = 0;
 float rollX = 0;
-float altBias = 0;
 float vX = 0;
+float vY = 0;
+float vZ = 0;
+float pX = 0;
+float pY = 0;
+float pZ = 0;
+float latitude = 0;
+float longitude = 0;
+int GPSSats = 0;
 float pressure = 0;
 float imuTemp = 0;
 float baroTemp = 0;
 float battV = 0;
 int state = 0;
-int abort = 0;
-int abortEn = 0;
-float mass = 0;
-int p1s = 0;
-int p2s = 0;
-int p3s = 0;
-int p1c = 0;
-int p2c = 0;
-int p3c = 0;
+int cameraState = 0;
+int rwState = 0;
 
 float oldOnTimeSec = 0;
 float onTimeSec = 0;
@@ -183,7 +186,7 @@ void setup()
     .getCaptionLabel()
     .setFont(mainFont);
   
-  cp5.addButton("abortFlight")
+  cp5.addButton("enableLaunch")
     .setBroadcast(false)
     .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 2, height - (buttonMargin + (buttonHeight + buttonPadding) * 2.5 - buttonPadding))
     .setSize(buttonWidth, buttonHeight)
@@ -191,11 +194,11 @@ void setup()
     .setColorForeground(color(189, 4, 4))
     .setColorActive(color(189, 4, 4))
     .setBroadcast(true)
-    .setLabel("ABORT FLIGHT")
+    .setLabel("ENABLE LAUNCH")
     .getCaptionLabel()
     .setFont(mainFont);
   
-  cp5.addButton("releasePiston")
+  cp5.addButton("beginDatalog")
     .setBroadcast(false)
     .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 3, height - (buttonMargin + (buttonHeight + buttonPadding) * 2.5 - buttonPadding))
     .setSize(buttonWidth, buttonHeight)
@@ -203,19 +206,19 @@ void setup()
     .setColorForeground(color(96, 128, 0))
     .setColorActive(color(96, 128, 0))
     .setBroadcast(true)
-    .setLabel("Release Piston")
+    .setLabel("Toggle Logging")
     .getCaptionLabel()
     .setFont(mainFont);
   
-  cp5.addButton("reserved4")
+  cp5.addButton("toggleCamera")
     .setBroadcast(false)
     .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 1, height - (buttonMargin + (buttonHeight + buttonPadding) * 1.5 - buttonPadding))
     .setSize(buttonWidth, buttonHeight)
-    .setColorBackground(color(80))
-    .setColorForeground(color(100))
-    .setColorActive(color(100))
+    .setColorBackground(color(255, 153, 51))
+    .setColorForeground(color(230, 115, 0))
+    .setColorActive(color(230, 115, 0))
     .setBroadcast(true)
-    .setLabel("N/A")
+    .setLabel("Toggle Camera")
     .getCaptionLabel()
     .setFont(mainFont);
   
@@ -231,15 +234,15 @@ void setup()
     .getCaptionLabel()
     .setFont(mainFont);
   
-  cp5.addButton("lockPiston")
+  cp5.addButton("reserved6")
     .setBroadcast(false)
     .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 3, height - (buttonMargin + (buttonHeight + buttonPadding) * 1.5 - buttonPadding))
     .setSize(buttonWidth, buttonHeight)
-    .setColorBackground(color(255, 153, 51))
-    .setColorForeground(color(230, 115, 0))
-    .setColorActive(color(230, 115, 0))
+    .setColorBackground(color(80))
+    .setColorForeground(color(100))
+    .setColorActive(color(100))
     .setBroadcast(true)
-    .setLabel("Lock Piston")
+    .setLabel("N/A")
     .getCaptionLabel()
     .setFont(mainFont);
   
@@ -275,12 +278,19 @@ void setup()
   altitudeGraph.xMax = 0;
   altitudeGraph.xDiv = dataSeconds;
   
-  velocityGraph.xLabel = "";
-  velocityGraph.yLabel = "";
-  velocityGraph.Title = "";
-  velocityGraph.xMin = -dataSeconds;
-  velocityGraph.xMax = 0;
-  velocityGraph.xDiv = dataSeconds;
+  pressureGraph.xLabel = "";
+  pressureGraph.yLabel = "";
+  pressureGraph.Title = "";
+  pressureGraph.xMin = -dataSeconds;
+  pressureGraph.xMax = 0;
+  pressureGraph.xDiv = dataSeconds;
+  
+  temperatureGraph.xLabel = "";
+  temperatureGraph.yLabel = "";
+  temperatureGraph.Title = "";
+  temperatureGraph.xMin = -dataSeconds;
+  temperatureGraph.xMax = 0;
+  temperatureGraph.xDiv = dataSeconds;
   
   clearGraphs();
 }
@@ -321,10 +331,10 @@ void draw()
   {
     rect(width - (345), 130 + (y * 220), 320 + 20 - 1, 200 - 1, 10);
   }
-  
-  rect(10, 130 + (3*230 + 15), 320 + 20 - 1, 200 - 46, 10);
-  rect(10, 130, 320 + 20 - 1, 199/2 + 40, 10);
-  rect(10, 130 + 160, 320 + 20 - 1, 420 + 102, 10);
+  rect(10, 136 + (3*193), 320 + 20 - 1, 200 - 46, 10); //temperature
+  rect(10, 130 + (3*230 + 60), 320 + 20 - 1, 200 - 46, 10); //pressure
+  rect(10, 120, 320 + 20 - 1, 199/2 -5, 10); //reaction wheel
+  rect(10, 130 + 160 -66, 320 + 20 - 1, 420+60, 10); //telemetry
   
   // Draw titles
   fill(fgColor);
@@ -335,16 +345,17 @@ void draw()
   text("Accelerometers", width - (340 / 2), 240 + 110 + 5);
   text("Gyroscopes",     width - (340 / 2), 460 + 110 + 5);
   text("Altitude",       width - (340 / 2), 680 + 110 + 5);
-  text("Vertical Velocity",       175, 680 + 150 + 10);
+  text("Ambient Pressure",       175, 680 + 150 + 10 +45);
+  text("Ambient Temperature",       175, 680 + 40 +1);
   
   textSize(25);
-  text("Attitude Control",     175, 140);
-  text("Raw Telemetry Data",       175, 305);
+  text("Reaction Wheel",     175, 130);
+  text("Raw Telemetry Data",       175, 305 -70);
   
   textAlign(LEFT, CENTER);
   textSize(31);
   
-  text("VOT: " + nf((int(onTimeSec) % 86400 ) / 3600, 2) + ":" + nf(((int(onTimeSec) % 86400 ) % 3600 ) / 60, 2) + ":" + nf(((int(onTimeSec) % 86400 ) % 3600 ) % 60, 2), 1005, 51);
+  text("SOT: " + nf((int(onTimeSec) % 86400 ) / 3600, 2) + ":" + nf(((int(onTimeSec) % 86400 ) % 3600 ) / 60, 2) + ":" + nf(((int(onTimeSec) % 86400 ) % 3600 ) % 60, 2), 1005, 51);
   text("MET: " + nf((int(flightTimeSec) % 86400 ) / 3600, 2) + ":" + nf(((int(flightTimeSec) % 86400 ) % 3600 ) / 60, 2) + ":" + nf(((int(flightTimeSec) % 86400 ) % 3600 ) % 60, 2), 1290, 51);
   text("Date: " + nf(month(), 2) + "." + nf(day(), 2) + "." + year(), 400, 51);
   text("Local: " + nf(hour(), 2) + ":" + nf(minute(), 2) + ":" + nf(second(), 2), 720, 51);
@@ -370,15 +381,20 @@ void draw()
   altitudeGraph.yMin = min(minMaxAltitude[0], 0); // - (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
   altitudeGraph.yMax = max(minMaxAltitude[1], 1); // + (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
   
-  float[] minMaxVelocity = {min(velocityValues), max(velocityValues)};
-  velocityGraph.yMin = min(minMaxVelocity[0], -1); // - (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
-  velocityGraph.yMax = max(minMaxVelocity[1], 1); // + (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
+  float[] minMaxPressure = {min(pressureValues), max(pressureValues)};
+  pressureGraph.yMin = min(minMaxPressure[0], -1); // - (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
+  pressureGraph.yMax = max(minMaxPressure[1], 1); // + (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
+ 
+  float[] minMaxTemperature = {min(temperatureValues), max(temperatureValues)};
+  temperatureGraph.yMin = min(minMaxTemperature[0], -1); // - (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
+  temperatureGraph.yMax = max(minMaxTemperature[1], 1); // + (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
   
   oriGraph.DrawAxis();
   accelGraph.DrawAxis();
   gyroGraph.DrawAxis();
   altitudeGraph.DrawAxis();
-  velocityGraph.DrawAxis();
+  pressureGraph.DrawAxis();
+  temperatureGraph.DrawAxis();
   for(int i = 0; i < 3; i++)
   {
     oriGraph.GraphColor = graphColors[i];
@@ -391,85 +407,90 @@ void draw()
   }
   altitudeGraph.GraphColor = defaultColor;
   altitudeGraph.LineGraph(dataSamples, altitudeValues);
-  velocityGraph.GraphColor = defaultColor;
-  velocityGraph.LineGraph(dataSamples, velocityValues);
-  
+  pressureGraph.GraphColor = defaultColor;
+  pressureGraph.LineGraph(dataSamples, pressureValues);
+  temperatureGraph.GraphColor = defaultColor;
+  temperatureGraph.LineGraph(dataSamples, pressureValues);
   // Raw telem values
   noStroke();
   fill(fgColor);
   textAlign(LEFT, CENTER);
   textSize(15);
-  text("oX:  " + nf(oriX, 0, 2), 40, 360);
-  text("oY:  " + nf(oriY, 0, 2), 40, 390);
-  text("oZ:  " + nf(oriZ, 0, 2), 40, 420);
+  text("oX:  " + nf(oriX, 0, 2), 40, 360 -73);
+  text("oY:  " + nf(oriY, 0, 2), 40, 390 -73);
+  text("oZ:  " + nf(oriZ, 0, 2), 40, 420 -73);
   
-  text("aX:  " + nf(accelX, 0, 2), 40, 450);
-  text("aY:  " + nf(accelY, 0, 2), 40, 480);
-  text("aZ:  " + nf(accelZ, 0, 2), 40, 510);
+  text("aX:  " + nf(accelX, 0, 2), 40, 450 -73);
+  text("aY:  " + nf(accelY, 0, 2), 40, 480 -73);
+  text("aZ:  " + nf(accelZ, 0, 2), 40, 510 -73);
   
-  text("gX:  " + nf(gyroX, 0, 2), 40, 540);
-  text("gY:  " + nf(gyroY, 0, 2), 40, 570);
-  text("gZ:  " + nf(gyroZ, 0, 2), 40, 600);
+  text("gX:  " + nf(gyroX, 0, 2), 40, 540 -73);
+  text("gY:  " + nf(gyroY, 0, 2), 40, 570 -73);
+  text("gZ:  " + nf(gyroZ, 0, 2), 40, 600 -73);
   
-  text("alt:  " + nf(altitude, 0, 2), 40, 630);
+  text("pX:  " + nf(pX, 0, 2), 40, 630 -73);
+  text("pY:  " + nf(pY, 0, 2), 40, 660 -73);
+  text("pZ:  " + nf(pZ, 0, 2), 40, 690 -73);
+  text("GPS Sats:  " + nf(GPSSats, 0, 0), 40, 720 -73);
+  text("lat:  " + nf(latitude, 0, 5), 40, 750 -73);
+  text("lon:  " + nf(longitude, 0, 5), 200, 750 -73);
+  text("alt:  " + nf(altitude, 0, 2), 200, 690 -73);
   
-  text("altBias:  " + nf(altBias, 0, 2), 40, 660);
+
   
-  text("vX:  " + nf(vX, 0, 2), 40, 690);
+  text("vX:  " + nf(vX, 0, 2), 200, 540 -73);
+  text("vY:  " + nf(vY, 0, 2), 200, 570 -73);
+  text("vZ:  " + nf(vZ, 0, 2), 200, 600 -73);
+  text("p:  " + nf(pressure, 0, 2), 200, 720 -73);
   
-  text("p:  " + nf(pressure, 0, 2), 40, 720);
-  
-  text("IMU T:  " + nf(imuTemp, 0, 2), 40, 750);
-  text("baro T:  " + nf(baroTemp, 0, 2), 40, 780);
+  text("IMU T:  " + nf(imuTemp, 0, 2), 200, 660 -73);
+  text("baro T:  " + nf(baroTemp, 0, 2), 200, 630 -73);
     
-  text("state:  " + state, 200, 360);
-  text("abort:  " + abort, 200, 390);
-  text("AFTSEn:  " + abortEn, 200, 420);
-  text("mass:  " + nf(mass, 0, 3), 200, 450);
-  text("P1s:  " + p1s, 200, 480);
-  text("P2s:  " + p2s, 200, 510);
-  text("P3s:  " + p3s, 200, 540);
-  text("P1c:  " + p1c, 200, 570);
-  text("P2c:  " + p2c, 200, 600);
-  text("P3c:  " + p3c, 200, 630);
-  text("volts:  " + nf(battV, 0, 2), 200, 660);
+  text("state:  " + state, 200, 360 -73);
+  text("cameraState:  " + state, 200, 390 -73);
+  text("rwState:  " + state, 200, 420 -73);
+  text("volts:  " + nf(battV, 0, 2), 200, 450 -73);
   
   if((oldOnTimeSec - onTimeSec) == 0){
-    text("TLM:  " + nf(0, 0, 2), 200, 690);
+    text("TLM:  " + nf(0, 0, 2), 200, 480 -73);
   } else {
-    text("TLM:  " + nf(1 / (onTimeSec - oldOnTimeSec), 0, 2), 200, 690);
+    text("TLM:  " + nf(1 / (onTimeSec - oldOnTimeSec), 0, 2), 200, 480 -73);
   }
   
-  text("TLM Δ:  " + nf(onTimeSec - oldOnTimeSec, 0, 3), 200, 720);
+  text("TLM Δ:  " + nf(onTimeSec - oldOnTimeSec, 0, 3), 200, 510 -73);
    
   textAlign(RIGHT, CENTER);
-  text("°", 170, 360);
-  text("°", 170, 390);
-  text("°", 170, 420);
-  text("m/s²", 170, 450);
-  text("m/s²", 170, 480);
-  text("m/s²", 170, 510);
-  text("°/s", 170, 540);
-  text("°/s", 170, 570);
-  text("°/s", 170, 600);
-  text("m", 170, 630);
-  text("m", 170, 660);
-  text("m/s", 170, 690);
-  text("hPa", 170, 720);
-  text("°C", 170, 750);
-  text("°C", 170, 780);
+  text("°", 170, 360 -73);
+  text("°", 170, 390 -73);
+  text("°", 170, 420 -73);
+  text("m/s²", 170, 450 -73);
+  text("m/s²", 170, 480 -73);
+  text("m/s²", 170, 510 -73);
+  text("°/s", 170, 540 -73);
+  text("°/s", 170, 570 -73);
+  text("°/s", 170, 600 -73);
+  text("m", 330, 690 -73);
+  text("m", 170, 630 -73);
+  text("m", 170, 660 -73);
+  text("m", 170, 690 -73);
+  text("m/s", 330, 540 -73);
+  text("m/s", 330, 570 -73);
+  text("m/s", 330, 600 -73);
+  text("hPa", 330, 720 -73);
+  text("°C", 330, 660 -73);
+  text("°C", 330, 630 -73);
   
-  text("kg", 330, 450);
-  text("V", 330, 660);
-  text("Hz", 330, 690);
-  text("s", 330, 720);
+  text("V", 330, 450 -73);
+  text("Hz", 330, 480 -73);
+  text("s", 330, 510 -73);
   
+  text("°", 170, 750 -73);
+  text("°", 330, 750 -73);
   textAlign(LEFT, CENTER);
   textSize(18);
-
-  text("TVC Y: " + nf(tvcY, 0, 2) + "°", 40, 200);
-  text("TVC Z: " + nf(tvcZ, 0, 2) + "°", 200, 200);
-  text("RW X: " + nf(rollX, 0, 2), 40, 230);
+  
+  text("RW Enabled: " + nf(rwState, 0), 200, 185);
+  text("RW Signal: " + nf(rollX, 0, 2), 40, 185);
 }
 
 void drawState()
@@ -479,35 +500,39 @@ void drawState()
   
   switch(state)
   {
-    case 0:
-      stateColor = color(51, 137, 242);
-      stateString = "Starting Up";
-      break;
     case 1:
       stateColor = color(68, 184, 81);
-      stateString = "Ready For Launch";
+      stateString = "Ground Idle";
       break;
     case 2:
       stateColor = color(242, 140, 51);
-      stateString = "Powered Ascent";
+     stateString = "Ready for Launch";
       break;
     case 3:
       stateColor = color(9, 183, 222);
-      stateString = "Unpowered Ascent";
+      stateString = "Powered Ascent";
       break;
     case 4:
       stateColor = color(190, 109, 207);
-      stateString = "Freefall Descent";
+      stateString = "Unpowered Ascent";
       break;
     case 5:
       stateColor = color(230, 222, 7);
-      stateString = "Parachute Descent";
+      stateString = "Launch Vehicle Sep";
       break;
     case 6:
       stateColor = color(16, 224, 214);
-      stateString = "Landing Detection";
+      stateString = "Parachute Descent";
       break;
     case 7:
+      stateColor = color(68, 184, 81);
+      stateString = "Roll Ori Control";
+      break;
+    case 8:
+      stateColor = color(68, 184, 81);
+      stateString = "Under 50m (RW Off)";
+      break;
+    case 9:
       stateColor = color(68, 184, 81);
       stateString = "Mission Complete";
       break;
@@ -558,7 +583,7 @@ void checkData()
         if(j == 0) // Hacky way to do this once
         {
           altitudeValues[i] = altitudeValues[i + 1];
-          velocityValues[i] = velocityValues[i + 1];
+          pressureValues[i] = pressureValues[i + 1];
         }
       }
     }
@@ -576,7 +601,7 @@ void checkData()
     gyroValues[2][dataSamples.length - 1] = gyroZ;
     
     altitudeValues[dataSamples.length - 1] = altitude;
-    velocityValues[dataSamples.length - 1] = vX;
+    pressureValues[dataSamples.length - 1] = vX;
     
     nextUpdateMillis += 1000 / dataHz;
   }
@@ -586,11 +611,11 @@ int parseData(String data)
 {
   // Check data is good
   if(data.length() == 0) return -1;
-  if(data.charAt(0) != 'T' || data.charAt(1) != 'L' || data.charAt(2) != 'M') return -1;
+  if(data.charAt(0) != 'R' || data.charAt(1) != 'O' || data.charAt(2) != 'T' || data.charAt(3) != 'A'|| data.charAt(4) != 'T' || data.charAt(5) != 'L' || data.charAt(6) != 'M') return -1;
 
-  String[] dataBits = split(data.substring(3), ',');
+  String[] dataBits = split(data.substring(7), ',');
 
-  if(dataBits.length != 31) return -1;
+  if(dataBits.length != 27) return -1;
   
   oldOnTimeSec = onTimeSec;
 
@@ -604,28 +629,25 @@ int parseData(String data)
   gyroY = parseFloat(dataBits[7]);
   gyroZ = parseFloat(dataBits[8]);
   altitude = parseFloat(dataBits[9]);
-  tvcY = parseFloat(dataBits[10]);
-  tvcZ = parseFloat(dataBits[11]);
-  rollX = parseFloat(dataBits[12]);
-  altBias = parseFloat(dataBits[13]);
-  vX = parseFloat(dataBits[14]);
-  pressure = parseFloat(dataBits[15]);
-  imuTemp = parseFloat(dataBits[16]);
-  baroTemp = parseFloat(dataBits[17]);
-  battV = parseFloat(dataBits[18]);
-  state = parseInt(dataBits[19]);
-  abort = parseInt(dataBits[20]);
-  abortEn = parseInt(dataBits[21]);
-  mass = parseFloat(dataBits[22]);
-  p1s = parseInt(dataBits[23]);
-  p2s = parseInt(dataBits[24]);
-  p3s = parseInt(dataBits[25]);
-  p1c = parseInt(dataBits[26]);
-  p2c = parseInt(dataBits[27]);
-  p3c = parseInt(dataBits[28]);
-  onTimeSec = parseFloat(dataBits[29]);
-  flightTimeSec = parseFloat(dataBits[30]);
-  
+  rollX = parseFloat(dataBits[10]);
+  vX = parseFloat(dataBits[11]);
+  vY = parseFloat(dataBits[12]);
+  vZ = parseFloat(dataBits[13]);
+  pX = parseInt(dataBits[14]);
+  pY = parseInt(dataBits[15]);
+  pZ = parseInt(dataBits[16]);
+  battV = parseFloat(dataBits[17]);
+  state = parseInt(dataBits[18]);
+  cameraState = parseInt(dataBits[19]);
+  rwState = parseInt(dataBits[20]);
+  onTimeSec = parseFloat(dataBits[21]);
+  flightTimeSec = parseFloat(dataBits[22]);
+  pressure = parseFloat(dataBits[23]);
+  imuTemp = parseFloat(dataBits[24]);
+  baroTemp = parseFloat(dataBits[25]);
+  GPSSats = parseInt(dataBits[26]);
+  latitude = parseFloat(dataBits[27]);
+  longitude = parseFloat(dataBits[28]);
   return 0;
 }
 
@@ -652,6 +674,6 @@ void clearGraphs()
     }
     
     altitudeValues[i] = 0;
-    velocityValues[i] = 0;
+    pressureValues[i] = 0;
   }
 }
