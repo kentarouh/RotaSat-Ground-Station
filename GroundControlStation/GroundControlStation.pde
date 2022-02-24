@@ -142,23 +142,34 @@ void pickSerial()
   }
 }
 
-void abortFlight(){
+void advanceState(){
   if(!running || COMx == "N/A") return;
-  if(state != 2) return;
-  inPort.write("A");
+  //if(state != 1) return;
+  inPort.write("ADVST");
 }
 
-void lockPiston(){
+void toggleCamera(){
   if(!running || COMx == "N/A") return;
-  if(state != 1) return;
-  inPort.write("l");
+  //if(state != 1) return;
+  if(cameraState == 1){
+    inPort.write("CAMOFF");
+  } else {
+    inPort.write("CAMON");
+  }
 }
 
-void releasePiston(){
+void switchRollSetpoint(){
   if(!running || COMx == "N/A") return;
-  if(state != 1) return;
-  inPort.write("r");
+  if(state != 7) return;
+  inPort.write("RWSP");
 }
+
+void calibrateGyros(){
+  if(!running || COMx == "N/A") return;
+  if(state != 1 || state != 2) return;
+  inPort.write("GYCAL");
+}
+
 
 void setup()
 {
@@ -182,7 +193,7 @@ void setup()
     .setColorForeground(color(0, 93, 207))
     .setColorActive(color(0, 93, 207))
     .setBroadcast(true)
-    .setLabel("Choose Port")
+    .setLabel("Choose Input")
     .getCaptionLabel()
     .setFont(mainFont);
   
@@ -194,11 +205,11 @@ void setup()
     .setColorForeground(color(189, 4, 4))
     .setColorActive(color(189, 4, 4))
     .setBroadcast(true)
-    .setLabel("ENABLE LAUNCH")
+    .setLabel("Enable Launch")
     .getCaptionLabel()
     .setFont(mainFont);
   
-  cp5.addButton("beginDatalog")
+  cp5.addButton("toggleCamera")
     .setBroadcast(false)
     .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 3, height - (buttonMargin + (buttonHeight + buttonPadding) * 2.5 - buttonPadding))
     .setSize(buttonWidth, buttonHeight)
@@ -206,11 +217,11 @@ void setup()
     .setColorForeground(color(96, 128, 0))
     .setColorActive(color(96, 128, 0))
     .setBroadcast(true)
-    .setLabel("Toggle Logging")
+    .setLabel("Toggle Camera")
     .getCaptionLabel()
     .setFont(mainFont);
   
-  cp5.addButton("toggleCamera")
+  cp5.addButton("advanceState")
     .setBroadcast(false)
     .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 1, height - (buttonMargin + (buttonHeight + buttonPadding) * 1.5 - buttonPadding))
     .setSize(buttonWidth, buttonHeight)
@@ -218,31 +229,31 @@ void setup()
     .setColorForeground(color(230, 115, 0))
     .setColorActive(color(230, 115, 0))
     .setBroadcast(true)
-    .setLabel("Toggle Camera")
+    .setLabel("Advance State")
     .getCaptionLabel()
     .setFont(mainFont);
   
-  cp5.addButton("reserved5")
+  cp5.addButton("switchRollSetpoint")
     .setBroadcast(false)
     .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 2, height - (buttonMargin + (buttonHeight + buttonPadding) * 1.5 - buttonPadding))
     .setSize(buttonWidth, buttonHeight)
-    .setColorBackground(color(80))
-    .setColorForeground(color(100))
-    .setColorActive(color(100))
+    .setColorBackground(color(97, 48, 166))
+    .setColorForeground(color(74, 36, 128))
+    .setColorActive(color(74, 36, 128))
     .setBroadcast(true)
-    .setLabel("N/A")
+    .setLabel("RW Setpoint +90")
     .getCaptionLabel()
     .setFont(mainFont);
   
-  cp5.addButton("reserved6")
+  cp5.addButton("calibrateGyros")
     .setBroadcast(false)
     .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 3, height - (buttonMargin + (buttonHeight + buttonPadding) * 1.5 - buttonPadding))
     .setSize(buttonWidth, buttonHeight)
-    .setColorBackground(color(80))
-    .setColorForeground(color(100))
-    .setColorActive(color(100))
+    .setColorBackground(color(0, 181, 201))
+    .setColorForeground(color(0, 134, 148))
+    .setColorActive(color(0, 134, 148))
     .setBroadcast(true)
-    .setLabel("N/A")
+    .setLabel("Calibrate Gyros")
     .getCaptionLabel()
     .setFont(mainFont);
   
