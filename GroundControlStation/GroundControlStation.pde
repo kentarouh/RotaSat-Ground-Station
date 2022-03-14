@@ -109,7 +109,7 @@ int buttonPadding = 30;
 int buttonWidth = (1100 - (190) - (buttonPadding * 2)) / 3;
 int buttonHeight = 150;
 
-void pickSerial()
+void chooseInput()
 {
   COMt = COMx;
   if(inPort != null) inPort.stop();
@@ -140,6 +140,12 @@ void pickSerial()
     println("Error:", e);
     COMx = "N/A";
   }
+}
+
+void enableLaunch(){
+  if(!running || COMx == "N/A") return;
+  if(state != 1) return;
+  inPort.write("ENL");
 }
 
 void advanceState(){
@@ -185,7 +191,7 @@ void setup()
   
   cp5 = new ControlP5(this);
   
-  cp5.addButton("pickSerial")
+  cp5.addButton("chooseInput")
     .setBroadcast(false)
     .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 1, height - (buttonMargin + (buttonHeight + buttonPadding) * 2.5 - buttonPadding))
     .setSize(buttonWidth, buttonHeight)
