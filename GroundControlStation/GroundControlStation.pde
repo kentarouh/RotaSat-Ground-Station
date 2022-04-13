@@ -106,8 +106,8 @@ boolean running = true;
 int buttonMargin = 190;
 int buttonPadding = 30;
 
-int buttonWidth = (1100 - (190) - (buttonPadding * 2)) / 3;
-int buttonHeight = 150;
+int buttonWidth = (1150 - (buttonPadding * 2)) / 3;
+int buttonHeight = 110;
 
 void chooseInput()
 {
@@ -193,7 +193,7 @@ void setup()
   
   cp5.addButton("chooseInput")
     .setBroadcast(false)
-    .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 1, height - (buttonMargin + (buttonHeight + buttonPadding) * 2.5 - buttonPadding))
+    .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 1 -200, height - (buttonMargin + (buttonHeight + buttonPadding) * 2.5 - buttonPadding + 410))
     .setSize(buttonWidth, buttonHeight)
     .setColorBackground(color(0, 115, 255))
     .setColorForeground(color(0, 93, 207))
@@ -205,7 +205,7 @@ void setup()
   
   cp5.addButton("enableLaunch")
     .setBroadcast(false)
-    .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 2, height - (buttonMargin + (buttonHeight + buttonPadding) * 2.5 - buttonPadding))
+    .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 2-200, height - (buttonMargin + (buttonHeight + buttonPadding) * 2.5 - buttonPadding+ 410))
     .setSize(buttonWidth, buttonHeight)
     .setColorBackground(color(255, 8, 8))
     .setColorForeground(color(189, 4, 4))
@@ -217,7 +217,7 @@ void setup()
   
   cp5.addButton("toggleCamera")
     .setBroadcast(false)
-    .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 3, height - (buttonMargin + (buttonHeight + buttonPadding) * 2.5 - buttonPadding))
+    .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 3-200, height - (buttonMargin + (buttonHeight + buttonPadding) * 2.5 - buttonPadding+ 410))
     .setSize(buttonWidth, buttonHeight)
     .setColorBackground(color(134, 179, 0))
     .setColorForeground(color(96, 128, 0))
@@ -229,7 +229,7 @@ void setup()
   
   cp5.addButton("advanceState")
     .setBroadcast(false)
-    .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 1, height - (buttonMargin + (buttonHeight + buttonPadding) * 1.5 - buttonPadding))
+    .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 1-200, height - (buttonMargin + (buttonHeight + buttonPadding) * 1.5 - buttonPadding - 230))
     .setSize(buttonWidth, buttonHeight)
     .setColorBackground(color(255, 153, 51))
     .setColorForeground(color(230, 115, 0))
@@ -241,7 +241,7 @@ void setup()
   
   cp5.addButton("switchRollSetpoint")
     .setBroadcast(false)
-    .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 2, height - (buttonMargin + (buttonHeight + buttonPadding) * 1.5 - buttonPadding))
+    .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 2-200, height - (buttonMargin + (buttonHeight + buttonPadding) * 1.5 - buttonPadding- 230))
     .setSize(buttonWidth, buttonHeight)
     .setColorBackground(color(97, 48, 166))
     .setColorForeground(color(74, 36, 128))
@@ -253,7 +253,7 @@ void setup()
   
   cp5.addButton("calibrateGyros")
     .setBroadcast(false)
-    .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 3, height - (buttonMargin + (buttonHeight + buttonPadding) * 1.5 - buttonPadding))
+    .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 3-200, height - (buttonMargin + (buttonHeight + buttonPadding) * 1.5 - buttonPadding- 230))
     .setSize(buttonWidth, buttonHeight)
     .setColorBackground(color(0, 181, 201))
     .setColorForeground(color(0, 134, 148))
