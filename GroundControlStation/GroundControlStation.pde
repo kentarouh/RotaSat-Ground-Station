@@ -140,41 +140,41 @@ void chooseInput()
 void enableLaunch(){
   if(!running || COMx == "N/A") return;
   if(state != 1) return;
-  inPort.write("ENL");
+  inPort.write("ROTACMD_EN/n");
 }
 
 void advanceState(){
   if(!running || COMx == "N/A") return;
   //if(state != 1) return;
-  inPort.write("ADVST");
+  inPort.write("ROTACMD_AS/n");
 }
 
 void toggleCamera(){
   if(!running || COMx == "N/A") return;
   //if(state != 1) return;
   if(cameraState == 1){
-    inPort.write("CAMOFF");
+    inPort.write("ROTACMD_CL/n");
   } else {
-    inPort.write("CAMON");
+    inPort.write("ROTACMD_CH/n");
   }
 }
 
 void switchRollSetpoint(){
   if(!running || COMx == "N/A") return;
   if(state != 7) return;
-  inPort.write("RWSP");
+  inPort.write("ROTACMD_SP/n");
 }
 
 void calibrateGyros(){
   if(!running || COMx == "N/A") return;
   if(state != 1 || state != 2) return;
-  inPort.write("GYCAL");
+  inPort.write("ROTACMD_GY/n");
 }
 
 
 void setup()
 {
-  surface.setTitle("Telemetry Ground Station");
+  surface.setTitle("RotaSat Ground Station");
   surface.setResizable(true);
   size(1920, 1080);
   
