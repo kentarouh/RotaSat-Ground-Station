@@ -140,35 +140,35 @@ void chooseInput()
 void enableLaunch(){
   if(!running || COMx == "N/A") return;
   if(state != 1) return;
-  inPort.write("ROTACMD_EN/n");
+  inPort.write("ROTACMD_EN\n");
 }
 
 void advanceState(){
   if(!running || COMx == "N/A") return;
   //if(state != 1) return;
-  inPort.write("ROTACMD_AS/n");
+  inPort.write("ROTACMD_AS\n");
 }
 
 void toggleCamera(){
   if(!running || COMx == "N/A") return;
   //if(state != 1) return;
   if(cameraState == 1){
-    inPort.write("ROTACMD_CL/n");
+    inPort.write("ROTACMD_CL\n");
   } else {
-    inPort.write("ROTACMD_CH/n");
+    inPort.write("ROTACMD_CH\n");
   }
 }
 
 void switchRollSetpoint(){
   if(!running || COMx == "N/A") return;
   if(state != 7) return;
-  inPort.write("ROTACMD_SP/n");
+  inPort.write("ROTACMD_SP\n");
 }
 
 void calibrateGyros(){
   if(!running || COMx == "N/A") return;
   if(state != 1 || state != 2) return;
-  inPort.write("ROTACMD_GY/n");
+  inPort.write("ROTACMD_GY\n");
 }
 
 
