@@ -68,12 +68,7 @@ float gyroY = 0;
 float gyroZ = 0;
 float altitude = 0;
 float rollX = 0;
-float vX = 0;
-float vY = 0;
-float vZ = 0;
 float pX = 0;
-float pY = 0;
-float pZ = 0;
 float latitude = 0;
 float longitude = 0;
 int GPSSats = 0;
@@ -446,26 +441,19 @@ void draw()
   text("gZ:  " + nf(gyroZ, 0, 2), 40, 600 -73);
   
   text("pX:  " + nf(pX, 0, 2), 40, 630 -73);
-  text("pY:  " + nf(pY, 0, 2), 40, 660 -73);
-  text("pZ:  " + nf(pZ, 0, 2), 40, 690 -73);
-  text("GPS Sats:  " + nf(GPSSats, 0, 0), 40, 720 -73);
-  text("lat:  " + nf(latitude, 0, 5), 40, 750 -73);
-  text("lon:  " + nf(longitude, 0, 5), 200, 750 -73);
-  text("alt:  " + nf(altitude, 0, 2), 200, 690 -73);
+  text("GPS Sats:  " + nf(GPSSats, 0, 0), 40, 690 -73);
+  text("lat:  " + nf(latitude, 0, 5), 40, 660 -73);
+  text("lon:  " + nf(longitude, 0, 5), 200, 660 -73);
+  text("alt:  " + nf(altitude, 0, 2), 200, 630 -73);
   
-
+  text("p:  " + nf(pressure, 0, 2), 200, 600 -73);
   
-  text("vX:  " + nf(vX, 0, 2), 200, 540 -73);
-  text("vY:  " + nf(vY, 0, 2), 200, 570 -73);
-  text("vZ:  " + nf(vZ, 0, 2), 200, 600 -73);
-  text("p:  " + nf(pressure, 0, 2), 200, 720 -73);
-  
-  text("IMU T:  " + nf(imuTemp, 0, 2), 200, 660 -73);
-  text("baro T:  " + nf(baroTemp, 0, 2), 200, 630 -73);
+  text("IMU T:  " + nf(imuTemp, 0, 2), 200, 570 -73);
+  text("baro T:  " + nf(baroTemp, 0, 2), 200, 540 -73);
     
   text("state:  " + state, 200, 360 -73);
-  text("cameraState:  " + state, 200, 390 -73);
-  text("rwState:  " + state, 200, 420 -73);
+  text("cameraState:  " + cameraState, 200, 390 -73);
+  text("rwState:  " + rwState, 200, 420 -73);
   text("volts:  " + nf(battV, 0, 2), 200, 450 -73);
   
   if((oldOnTimeSec - onTimeSec) == 0){
@@ -486,23 +474,18 @@ void draw()
   text("°/s", 170, 540 -73);
   text("°/s", 170, 570 -73);
   text("°/s", 170, 600 -73);
-  text("m", 330, 690 -73);
+  text("m", 330, 630 -73);
   text("m", 170, 630 -73);
-  text("m", 170, 660 -73);
-  text("m", 170, 690 -73);
-  text("m/s", 330, 540 -73);
-  text("m/s", 330, 570 -73);
-  text("m/s", 330, 600 -73);
-  text("hPa", 330, 720 -73);
-  text("°C", 330, 660 -73);
-  text("°C", 330, 630 -73);
+  text("hPa", 330, 600 -73);
+  text("°C", 330, 570 -73);
+  text("°C", 330, 540 -73);
   
   text("V", 330, 450 -73);
   text("Hz", 330, 480 -73);
   text("s", 330, 510 -73);
   
-  text("°", 170, 750 -73);
-  text("°", 330, 750 -73);
+  text("°", 170, 660 -73);
+  text("°", 330, 660 -73);
   textAlign(LEFT, CENTER);
   textSize(18);
   
@@ -618,7 +601,7 @@ void checkData()
     gyroValues[2][dataSamples.length - 1] = gyroZ;
     
     altitudeValues[dataSamples.length - 1] = altitude;
-    pressureValues[dataSamples.length - 1] = vX;
+    pressureValues[dataSamples.length - 1] = pressure;
     
     nextUpdateMillis += 1000 / dataHz;
   }
@@ -632,7 +615,7 @@ int parseData(String data)
 
   String[] dataBits = split(data.substring(7), ',');
 
-  if(dataBits.length != 27) return -1;
+  if(dataBits.length != 24) return -1;
   
   oldOnTimeSec = onTimeSec;
 
@@ -646,25 +629,20 @@ int parseData(String data)
   gyroY = parseFloat(dataBits[7]);
   gyroZ = parseFloat(dataBits[8]);
   altitude = parseFloat(dataBits[9]);
-  rollX = parseFloat(dataBits[10]);
-  vX = parseFloat(dataBits[11]);
-  vY = parseFloat(dataBits[12]);
-  vZ = parseFloat(dataBits[13]);
-  pX = parseInt(dataBits[14]);
-  pY = parseInt(dataBits[15]);
-  pZ = parseInt(dataBits[16]);
-  battV = parseFloat(dataBits[17]);
-  state = parseInt(dataBits[18]);
-  cameraState = parseInt(dataBits[19]);
-  rwState = parseInt(dataBits[20]);
-  onTimeSec = parseFloat(dataBits[21]);
-  flightTimeSec = parseFloat(dataBits[22]);
-  pressure = parseFloat(dataBits[23]);
-  imuTemp = parseFloat(dataBits[24]);
-  baroTemp = parseFloat(dataBits[25]);
-  GPSSats = parseInt(dataBits[26]);
-  latitude = parseFloat(dataBits[27]);
-  longitude = parseFloat(dataBits[28]);
+  pX = parseFloat(dataBits[10]);
+  rollX = parseFloat(dataBits[11]);
+  battV = parseFloat(dataBits[12]);
+  state = parseInt(dataBits[13]);
+  cameraState = parseInt(dataBits[14]);
+  rwState = parseInt(dataBits[15]);
+  onTimeSec = parseFloat(dataBits[16]);
+  flightTimeSec = parseFloat(dataBits[17]);
+  pressure = parseFloat(dataBits[18]);
+  imuTemp = parseFloat(dataBits[19]);
+  baroTemp = parseFloat(dataBits[20]);
+  GPSSats = parseInt(dataBits[21]);
+  latitude = parseFloat(dataBits[22]);
+  longitude = parseFloat(dataBits[23]);
   return 0;
 }
 
