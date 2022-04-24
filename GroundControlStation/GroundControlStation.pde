@@ -165,11 +165,11 @@ void switchRollSetpoint(){
   inPort.write("<SP>\n");
 }
 
-void calibrateGyros(){
-  if(!running || COMx == "N/A") return;
-  if(state != 1 || state != 2) return;
-  inPort.write("<GY>\n");
-}
+//void calibrateGyros(){
+//  if(!running || COMx == "N/A") return;
+//  if(state != 1 || state != 2) return;
+//  inPort.write("<GY>\n");
+//}
 
 
 void setup()
@@ -246,17 +246,29 @@ void setup()
     .getCaptionLabel()
     .setFont(mainFont);
   
-  cp5.addButton("calibrateGyros")
+  cp5.addButton("button6")
     .setBroadcast(false)
     .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 3-200, height - (buttonMargin + (buttonHeight + buttonPadding) * 1.5 - buttonPadding- 230))
     .setSize(buttonWidth, buttonHeight)
-    .setColorBackground(color(0, 181, 201))
-    .setColorForeground(color(0, 134, 148))
-    .setColorActive(color(0, 134, 148))
+    .setColorBackground(color(80))
+    .setColorForeground(color(100))
+    .setColorActive(color(100))
     .setBroadcast(true)
-    .setLabel("Calibrate Gyros")
+    .setLabel("N/A")
     .getCaptionLabel()
     .setFont(mainFont);
+  
+    //cp5.addButton("calibrateGyros")
+  //  .setBroadcast(false)
+  //  .setPosition(buttonMargin + (buttonWidth + buttonPadding) * 3-200, height - (buttonMargin + (buttonHeight + buttonPadding) * 1.5 - buttonPadding- 230))
+  //  .setSize(buttonWidth, buttonHeight)
+  //  .setColorBackground(color(0, 181, 201))
+  //  .setColorForeground(color(0, 134, 148))
+  //  .setColorActive(color(0, 134, 148))
+  //  .setBroadcast(true)
+  //  .setLabel("Calibrate Gyros")
+  //  .getCaptionLabel()
+  //  .setFont(mainFont);
   
   logo = loadImage("logo.png");
   logo.resize(logo.width * (80 / logo.height), 80);
@@ -500,39 +512,45 @@ void drawState()
   
   switch(state)
   {
-    case 1:
+    case 0:
       stateColor = color(68, 184, 81);
       stateString = "Ground Idle";
       break;
-    case 2:
+    case 1:
       stateColor = color(242, 140, 51);
      stateString = "Ready for Launch";
       break;
-    case 3:
+    case 2:
       stateColor = color(9, 183, 222);
       stateString = "Powered Ascent";
       break;
-    case 4:
+    case 3:
       stateColor = color(190, 109, 207);
       stateString = "Unpowered Ascent";
       break;
-    case 5:
+    case 4:
       stateColor = color(230, 222, 7);
       stateString = "Launch Vehicle Sep";
       break;
-    case 6:
+    case 5:
       stateColor = color(16, 224, 214);
       stateString = "Parachute Descent";
       break;
-    case 7:
-      stateColor = color(68, 184, 81);
+    case 6:
       stateString = "Roll Ori Control";
+      
+      if(rwState == 0){
+        stateColor = color(217, 15, 15);
+      } else {
+        stateColor = color(68, 184, 81);
+      }
+     
       break;
-    case 8:
+    case 7:
       stateColor = color(68, 184, 81);
       stateString = "Under 50m (RW Off)";
       break;
-    case 9:
+    case 8:
       stateColor = color(68, 184, 81);
       stateString = "Mission Complete";
       break;
