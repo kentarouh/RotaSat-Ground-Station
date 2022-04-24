@@ -44,7 +44,7 @@ float[][] gyroValues = new float[3][dataSamples.length];
 float gyroMax = 0;
 float gyroMin = 0;
 
-float[] altitudeValues = new float[dataSamples.length];
+float[][] altitudeValues = new float[2][dataSamples.length];
 float altitudeMax = 0;
 float altitudelMin = 0;
 
@@ -52,7 +52,7 @@ float[] pressureValues = new float[dataSamples.length];
 float pressureMax = 0;
 float pressureMin = 0;
 
-float[] temperatureValues = new float[dataSamples.length];
+float[][] temperatureValues = new float[2][dataSamples.length];
 float temperatureMax = 0;
 float temperatureMin = 0;
 
@@ -401,16 +401,16 @@ void draw()
   gyroGraph.yMin = min(minMaxGyro[0], -1); // - (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
   gyroGraph.yMax = max(minMaxGyro[1], 1); // + (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
   
-  float[] minMaxAltitude = {min(altitudeValues), max(altitudeValues)};
+  float[] minMaxAltitude = minMaxValue2D(altitudeValues);
   altitudeGraph.yMin = min(minMaxAltitude[0], 0); // - (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
   altitudeGraph.yMax = max(minMaxAltitude[1], 1); // + (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
   
   float[] minMaxPressure = {min(pressureValues), max(pressureValues)};
-  pressureGraph.yMin = min(minMaxPressure[0], -1); // - (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
+  pressureGraph.yMin = min(minMaxPressure[0], 0); // - (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
   pressureGraph.yMax = max(minMaxPressure[1], 1); // + (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
  
-  float[] minMaxTemperature = {min(temperatureValues), max(temperatureValues)};
-  temperatureGraph.yMin = min(minMaxTemperature[0], -1); // - (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
+  float[] minMaxTemperature = minMaxValue2D(temperatureValues);
+  temperatureGraph.yMin = min(minMaxTemperature[0], 0); // - (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
   temperatureGraph.yMax = max(minMaxTemperature[1], 1); // + (abs(minMaxAccel[1] - minMaxAccel[0]) / 10);
   
   oriGraph.DrawAxis();
@@ -429,12 +429,19 @@ void draw()
     accelGraph.LineGraph(dataSamples, accelValues[i]);
     gyroGraph.LineGraph(dataSamples, gyroValues[i]);
   }
-  altitudeGraph.GraphColor = defaultColor;
-  altitudeGraph.LineGraph(dataSamples, altitudeValues);
+  
+  for(int i = 0; i < 2; i++)
+  {
+    altitudeGraph.GraphColor = graphColors[i+1];
+    altitudeGraph.LineGraph(dataSamples, altitudeValues[i]);
+    
+    temperatureGraph.GraphColor = graphColors[i];
+    temperatureGraph.LineGraph(dataSamples, temperatureValues[i]);
+  }
+  
   pressureGraph.GraphColor = defaultColor;
   pressureGraph.LineGraph(dataSamples, pressureValues);
-  temperatureGraph.GraphColor = defaultColor;
-  temperatureGraph.LineGraph(dataSamples, pressureValues);
+
   // Raw telem values
   noStroke();
   fill(fgColor);
@@ -512,46 +519,46 @@ void drawState()
   
   switch(state)
   {
-    case 0:
+    case 1:
       stateColor = color(68, 184, 81);
       stateString = "Ground Idle";
       break;
-    case 1:
+    case 2:
       stateColor = color(242, 140, 51);
      stateString = "Ready for Launch";
       break;
-    case 2:
+    case 3:
       stateColor = color(9, 183, 222);
       stateString = "Powered Ascent";
       break;
-    case 3:
+    case 4:
       stateColor = color(190, 109, 207);
       stateString = "Unpowered Ascent";
       break;
-    case 4:
+    case 5:
       stateColor = color(230, 222, 7);
       stateString = "Launch Vehicle Sep";
       break;
-    case 5:
-      stateColor = color(16, 224, 214);
+    case 6:
+      stateColor = color(68, 169, 184);
       stateString = "Parachute Descent";
       break;
-    case 6:
+    case 7:
       stateString = "Roll Ori Control";
       
       if(rwState == 0){
         stateColor = color(217, 15, 15);
       } else {
-        stateColor = color(68, 184, 81);
+        stateColor = color(82, 75, 227);
       }
      
       break;
-    case 7:
-      stateColor = color(68, 184, 81);
+    case 8:
+      stateColor = color(227, 167, 64);
       stateString = "Under 50m (RW Off)";
       break;
-    case 8:
-      stateColor = color(68, 184, 81);
+    case 9:
+      stateColor = color(64, 227, 102);
       stateString = "Mission Complete";
       break;
     default:
@@ -600,9 +607,16 @@ void checkData()
         gyroValues[j][i] = gyroValues[j][i + 1];
         if(j == 0) // Hacky way to do this once
         {
-          altitudeValues[i] = altitudeValues[i + 1];
           pressureValues[i] = pressureValues[i + 1];
         }
+      }
+    }
+    
+    for(int j=0; j < 2; j++){
+      for(int i = 0; i < dataSamples.length - 1; i++)
+      {
+        altitudeValues[j][i] = altitudeValues[j][i + 1];
+        temperatureValues[j][i] = temperatureValues[j][i + 1];
       }
     }
     
@@ -618,8 +632,13 @@ void checkData()
     gyroValues[1][dataSamples.length - 1] = gyroY;
     gyroValues[2][dataSamples.length - 1] = gyroZ;
     
-    altitudeValues[dataSamples.length - 1] = altitude;
+    altitudeValues[0][dataSamples.length - 1] = altitude;
+    altitudeValues[1][dataSamples.length - 1] = pX;
+    
     pressureValues[dataSamples.length - 1] = pressure;
+    
+    temperatureValues[0][dataSamples.length - 1] = baroTemp;
+    temperatureValues[1][dataSamples.length - 1] = imuTemp;
     
     nextUpdateMillis += 1000 / dataHz;
   }
@@ -686,7 +705,12 @@ void clearGraphs()
       gyroValues[j][i] = 0;
     }
     
-    altitudeValues[i] = 0;
+    for(int j = 0; j < 2; j++)
+    {
+      altitudeValues[j][i] = 0;
+      temperatureValues[j][i] = 0;
+    }
+   
     pressureValues[i] = 0;
   }
 }
